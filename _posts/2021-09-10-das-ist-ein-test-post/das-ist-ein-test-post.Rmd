@@ -1,0 +1,41 @@
+---
+title: "Das ist ein Test-Post"
+description: |
+  Das ist die Beschreibung des Test Posts
+author:
+  - name: the Ced
+    url: https://github.com/theced7
+date: 09-10-2021
+output:
+  distill::distill_article:
+    self_contained: false
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Distill is a publication format for scientific and technical writing, native to the web.
+
+Learn more about using Distill at <https://rstudio.github.io/distill>.
+
+# mtcars
+
+## Korrelation
+
+Die Frage ist: Besteht eine Korrelation zwischen Leistung und Benzin-Verbrauch?
+
+Dazu schauen wir uns zunächst einen einfachen Scatterplot an:
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+
+mtcars %>% 
+  ggplot(aes(hp, mpg)) +
+  geom_point()
+```
+
+
+
