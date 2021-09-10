@@ -1,8 +1,9 @@
 name: "distill-blog"
-title: "My Blog"
+title: "Mein Blog"
 description: |
-  My Blog
+  Das ist ein Blog mit R und Distill.
 output_dir: "docs"     # root of master branch
+base_url: https://theced7.github.io/blog/
 navbar:
   right:
     - text: "Home"
