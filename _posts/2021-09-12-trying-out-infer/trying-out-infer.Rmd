@@ -1,10 +1,10 @@
 ---
 title: "Trying out infer"
 description: |
-  A short description of the post.
+  This is ought to be a short blog post, firstly to get to grips with Distill, secondly to try out infer.
 author:
-  - name: Nora Jones
-    url: https://example.com/norajones
+  - name: theCed7
+    url: https://github.com/theced7
 date: 09-12-2021
 output:
   distill::distill_article:
@@ -16,8 +16,78 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-Distill is a publication format for scientific and technical writing, native to the web.
+# Getting started
 
-Learn more about using Distill at <https://rstudio.github.io/distill>.
+First things first: Let's load infer and the rest of the _tidyverse_:
+
+```{r echo=TRUE}
+library(infer)
+library(tidyverse)
+```
+
+_Infer_ is a _tidyverse_ package which aims to aid statistical testing. As such, we also need some data to conduct statistical testing on. As it is 2021, we might as well use something coronavirus-related. This download the vast _Our World in Data_ source file and reads it into R. I will also focus on the UK, since it's one of the countries with the most cohesive data available.
+
+```{r echo=TRUE}
+#download.file("https://github.com/owid/covid-19-data/raw/master/public/data/owid-covid-data.csv", "owid-covid-data.csv")
+
+data <- read_csv("owid-covid-data.csv", 
+                 col_types = cols(date = col_date(format = "%Y-%m-%d")))
+
+data <- data %>%
+  filter(iso_code == "GBR") %>%
+  filter(date > "2021-01-01")
+
+glimpse(data)
+```
+
+# Starting off with _infer_
+
+The idea of _infer_ is to simplfy statistical testing into four easy steps:
+
+1. `specify()`
+2. `hypothesize()`
+3. `generate()`
+4. `calculate()`
+
+We now go through each of these steps one by one.
+
+## `specify`: What do we want to know?
+
+First of all, we have to clarify what issue we want to test. What variable of our data frame are we interested in? Here, we will ask: _Is there a correlation between **new cases** and the current **reproduction rate**?_
+
+```{r echo = TRUE}
+data %>% 
+  specify(new_cases ~ reproduction_rate)
+```
+
+## `hypothesize`: declaring the null hypothesis
+
+Secondly, we declare the _null hypothesis_. Statistically speaking, the null hypothesis assumes there is _truly_ no difference (or no correlation).
+
+```{r}
+data %>% 
+  specify(new_cases ~ reproduction_rate) %>% 
+  hypothesize(null = "independence")
+```
+
+## `generate`: generating the null distribution
+
+```{r}
+data %>% 
+  specify(new_cases ~ reproduction_rate) %>% 
+  hypothesize(null = "independence") %>% 
+  generate(reps = 1000, type = "permute")
+```
+
+## `calculate`: calculating summary statistics
+
+```{r}
+data %>% 
+  specify(new_cases ~ reproduction_rate) %>% 
+  hypothesize(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate(stat = "correlation")
+```
+
 
 

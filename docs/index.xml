@@ -7,7 +7,15 @@
     <description>Das ist ein Blog mit R und Distill.
 </description>
     <generator>Distill</generator>
-    <lastBuildDate>Fri, 10 Sep 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 11 Sep 2021 00:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Trying out infer</title>
+      <dc:creator>theCed7</dc:creator>
+      <link>https://theced7.github.io/blog/posts/2021-09-12-trying-out-infer</link>
+      <description>This is ought to be a short blog post, firstly to get to grips with Distill, secondly to try out infer.</description>
+      <guid>https://theced7.github.io/blog/posts/2021-09-12-trying-out-infer</guid>
+      <pubDate>Sat, 11 Sep 2021 00:00:00 +0000</pubDate>
+    </item>
     <item>
       <title>Welcome to My Blog</title>
       <dc:creator>Nora Jones</dc:creator>
@@ -23,7 +31,7 @@ reading what we have to say!</description>
       <link>https://theced7.github.io/blog/posts/2021-09-10-das-ist-ein-test-post</link>
       <description>Das ist die Beschreibung des Test Posts</description>
       <guid>https://theced7.github.io/blog/posts/2021-09-10-das-ist-ein-test-post</guid>
-      <pubDate>Thu, 09 Sep 2021 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 10 Sep 2021 00:00:00 +0000</pubDate>
       <media:content url="https://theced7.github.io/blog/posts/2021-09-10-das-ist-ein-test-post/das-ist-ein-test-post_files/figure-html5/unnamed-chunk-1-1.png" medium="image" type="image/png" width="1248" height="768"/>
     </item>
   </channel>
