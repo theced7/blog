@@ -34,7 +34,7 @@ data <- read_csv("owid-covid-data.csv",
                  col_types = cols(date = col_date(format = "%Y-%m-%d")))
 
 data <- data %>%
-  filter(iso_code == "GBR") %>%
+  filter(iso_code %in% c("GBR", "USA", "DEU")) %>%
   filter(date > "2021-01-01")
 
 glimpse(data)
@@ -53,40 +53,157 @@ We now go through each of these steps one by one.
 
 ## `specify`: What do we want to know?
 
-First of all, we have to clarify what issue we want to test. What variable of our data frame are we interested in? Here, we will ask: _Is there a correlation between **new cases** and the current **reproduction rate**?_
+First of all, we have to clarify what issue we want to test. What variable of our data frame are we interested in? In this blog post we will ask ourselves, whether there was a significant difference between the reported incidence of SARS-Cov-2 cases between Great Britain and the USA. _Has one country had on average less new cases (per million) than the other?_`
+
+So we `filter` the data to compare Great Britain and the USA. Then we `specify` what variables we are interested in. We also declare, what we believe is cause and effect, e. g. the different countries should explain (`explanatory`), why there is a difference in new cases (`response`). 
 
 ```{r echo = TRUE}
 data %>% 
-  specify(new_cases ~ reproduction_rate)
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(explanatory = iso_code, response = new_cases_per_million )
 ```
 
 ## `hypothesize`: declaring the null hypothesis
 
-Secondly, we declare the _null hypothesis_. Statistically speaking, the null hypothesis assumes there is _truly_ no difference (or no correlation).
+Secondly, we declare the _null hypothesis_. Statistically speaking, the null hypothesis assumes there _truly_ is no difference (or no correlation). Applied to our example our null hypothesis would be: _There is no significant difference in new SARS-Cov2 cases per million people between the US and the UK._ 
 
-```{r}
+On a side note: We also introduce a new, shorter way of using `specify`. Keep an eye on which order you place the arguments (i. e. column names) in, because that determines which is used as the dependent or independent variable. 
+
+Do not pay a lot of attention on the output our code is generating at this moment. Hopefully, this all comes together shortly. As long as there aren't any errors and you roughly understand the statistical lingo, we should be fine.
+
+```{r echo=TRUE}
 data %>% 
-  specify(new_cases ~ reproduction_rate) %>% 
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>% 
   hypothesize(null = "independence")
 ```
 
 ## `generate`: generating the null distribution
 
-```{r}
+Not quite sure what happens here.
+
+```{r echo=TRUE}
 data %>% 
-  specify(new_cases ~ reproduction_rate) %>% 
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(iso_code ~ new_cases_per_million) %>% 
   hypothesize(null = "independence") %>% 
   generate(reps = 1000, type = "permute")
 ```
 
 ## `calculate`: calculating summary statistics
 
-```{r}
+Now that we have some understanding of how to use the infer functions, we try to get back to our original question. 
+
+### Short interlude: Visualization 
+
+Before we move on with facts, figures and infer, let's try to get a rough picture of our question with some basic data visualization. 
+
+```{r echo=TRUE}
 data %>% 
-  specify(new_cases ~ reproduction_rate) %>% 
-  hypothesize(null = "independence") %>% 
-  generate(reps = 1000, type = "permute") %>% 
-  calculate(stat = "correlation")
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  ggplot(aes(x = iso_code, y = new_cases_per_million)) +
+  geom_jitter(alpha = 0.25) + 
+  geom_boxplot(alpha = 0.75) +
+  theme_minimal()
+```
+
+Here we already see that both medians lie quite close together. So, aren't these countries so different after all?
+
+### Back to infer: t-Test
+
+So, let's `calculate` how big the difference between both medians actually is:
+
+```{r echo = TRUE}
+observed_diff_in_medians <- data %>% 
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>% 
+  calculate(stat = "diff in medians", order = c("USA", "GBR"))
+
+observed_diff_in_medians
+```
+
+So, `stat = diff in medians` does what it says: It calculates the difference in medians. The `order` specifies the order of the subtraction (i. e. changes the sign.) 
+
+Just for illustration purposes, we can also try to calculate the difference in medians without infer:
+
+```{r echo=TRUE}
+data %>% 
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  group_by(iso_code) %>% 
+  summarise(
+    median = median(new_cases_per_million),
+  ) %>% 
+  summarise(
+    iso_code = iso_code,
+    median = median,
+    diff = diff(median),
+  )
+```
+
+But back to infer: We know now the difference between medians of `new_cases_per_million` in both countries equals `r observed_diff_in_medians`. Is this enough do discard our null hypothesis?
+
+Let's use infer to `generate` some data under the assumption, that in fact, _the null hypothesis is **true**_ and there genuinely is _no significant difference_ in new cases between both countries. Then we `calculate` the `diff in medians` for each replicate of the generated data.
+
+```{r echo=TRUE}
+null_dist_sample <- data %>% 
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(rep = 1000, type = "permute")
+
+null_dist_sample
+
+null_dist_sample <- null_dist_sample %>% 
+  calculate(stat = "diff in medians", order = c("GBR", "USA"))
+
+null_dist_sample
+```
+
+Now we can visualize our generated data. Think of it this way: Through some mathematical tricks, infer tried to simulate what our data would look like in a population where the null hypothesis were true.
+
+```{r echo=TRUE}
+null_dist_sample %>% 
+  visualise()
+```
+
+We see a histogram which represents the data of the 1000 reps we generated above. We see that the majority of reps calculated a `diff in medians` somewhere around zero. This makes sense, since this data is ought to be generated in a population where there is no _true_ difference between `new cases` (_null hypothesis_) and all difference there is should be due to random chance.
+
+Now, let's see where in that diagram our _acutal, observed_ difference in medians (`r observed_diff_in_medians`) would fall:
+
+```{r echo=TRUE}
+null_dist_sample %>% 
+  visualise() +
+    shade_p_value(observed_diff_in_medians,
+                direction = "two-sided")
+```
+
+
+```{r}
+# this calculates the t value
+data %>%
+  filter(iso_code %in% c("GBR", "USA")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>%
+  calculate(stat = "t", order = c("GBR", "USA"))
+  
+
+
+
+null_dist_sample %>% 
+  visualize() + 
+  shade_p_value(observed_diff_in_medians,
+                direction = "two-sided")
+
+p_value_2_sample <- null_dist_sample %>%
+  get_p_value(obs_stat = observed_diff_in_medians,
+              direction = "two-sided")
+
+p_value_2_sample
+
+t_test(x = data, 
+       formula = new_cases_per_million ~ iso_code, 
+       order = c("GBR", "USA"),
+       alternative = "two-sided")
+
 ```
 
 
