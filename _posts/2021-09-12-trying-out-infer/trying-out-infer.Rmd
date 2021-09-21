@@ -206,5 +206,66 @@ t_test(x = data,
 
 ```
 
+# Another one...
+
+To further strengthen our infer and statistical knowledge, let's look at another country. Maybe Germany had significantly lower cases on average than the USA?
+
+## Charts.
+
+On the first glance, it's still a close rase, however, there seems to be more of a differens in medians.
+
+```{r echo=TRUE}
+data %>% 
+  filter(iso_code %in% c("DEU", "USA")) %>% 
+  ggplot(aes(x = iso_code, y = new_cases_per_million)) +
+  geom_jitter(alpha = 0.25) + 
+  geom_boxplot(alpha = 0.75) +
+  theme_minimal()
+```
+
+## Infer
+
+Let's take more in-depth look with infer.
+
+```{r echo=TRUE}
+observed_median_diff_usa_deu <- data %>% 
+  filter(iso_code %in% c("USA", "DEU")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>% 
+  calculate("diff in medians", order = c("DEU", "USA"))
+
+observed_median_diff_usa_deu
+
+null_dist_usa_deu <- data %>% 
+  filter(iso_code %in% c("USA", "DEU")) %>% 
+  specify(new_cases_per_million ~ iso_code) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate("diff in medians", order = c("DEU", "USA"))
+
+
+null_dist_usa_deu %>% 
+  visualise() 
+
+null_dist_usa_deu %>% 
+  ggplot(aes(x = stat)) +
+  geom_histogram(bins = 16)
+
+null_dist_usa_deu %>% 
+  visualise() +
+  shade_p_value(observed_median_diff_usa_deu,
+                direction = "two-sided")
+
+p_value_median_usa_deu <- null_dist_usa_deu %>% 
+  get_p_value(obs_stat = observed_median_diff_usa_deu,
+              direction = "two-sided")
+
+p_value_median_usa_deu
+
+data %>% 
+  t_test(formula = new_cases_per_million ~ iso_code,
+         direction = "two-sided",
+         order = c("DEU", "USA"))
+```
+
 
 
