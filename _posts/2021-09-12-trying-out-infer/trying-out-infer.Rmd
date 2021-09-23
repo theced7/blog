@@ -212,51 +212,69 @@ To further strengthen our infer and statistical knowledge, let's look at another
 
 ## Charts.
 
-On the first glance, it's still a close rase, however, there seems to be more of a differens in medians.
-
 ```{r echo=TRUE}
 data %>% 
   filter(iso_code %in% c("DEU", "USA")) %>% 
   ggplot(aes(x = iso_code, y = new_cases_per_million)) +
+  stat_summary(fun=mean, geom="point", size=5, color="red", fill="red") +
   geom_jitter(alpha = 0.25) + 
   geom_boxplot(alpha = 0.75) +
   theme_minimal()
 ```
 
+On the first glance, it's still a close race, however, there seems to be more of a difference in medians.
+
+We further added a red dot to each box which represents the mean value of `new_cases_per_million` (notice the difference between mean and median). The means seem to be apart even further. 
+
 ## Infer
 
-Let's take more in-depth look with infer.
+Let's take more in-depth look with infer. Again, we start off by calculating the difference in means which we _observed_ in our data. 
+
+Then we let infer _generate_ data which simulates a population where the null hypothesis is true. In this _generated_ data where we also calculate the difference between means. 
 
 ```{r echo=TRUE}
-observed_median_diff_usa_deu <- data %>% 
+# Calculate difference in means in observed data
+observed_mean_diff_usa_deu <- data %>% 
   filter(iso_code %in% c("USA", "DEU")) %>% 
   specify(new_cases_per_million ~ iso_code) %>% 
-  calculate("diff in medians", order = c("DEU", "USA"))
+  calculate("diff in means", order = c("USA", "DEU"))
 
-observed_median_diff_usa_deu
+observed_mean_diff_usa_deu
 
+# generate a null distribution based on null hypothesis (independence)
+# then calculate the differences in means in that generated "population"
 null_dist_usa_deu <- data %>% 
   filter(iso_code %in% c("USA", "DEU")) %>% 
   specify(new_cases_per_million ~ iso_code) %>% 
   hypothesise(null = "independence") %>% 
   generate(reps = 1000, type = "permute") %>% 
-  calculate("diff in medians", order = c("DEU", "USA"))
-
-
-null_dist_usa_deu %>% 
-  visualise() 
+  calculate("diff in means", order = c("USA", "DEU"))
 
 null_dist_usa_deu %>% 
-  ggplot(aes(x = stat)) +
-  geom_histogram(bins = 16)
+  visualise()
+```
 
+We see that the difference in means between both countries equals `r round(observed_mean_diff_usa_deu,2)`. 
+
+Another very interesting feature of infer is it's ability to calculate [confidence intervals](https://en.wikipedia.org/wiki/Confidence_interval). 
+
+```{r echo=TRUE}
+# Calculate confidence intervals for our observed value in generated null dist.
+ci_diff_usa_deu <- null_dist_usa_deu %>% 
+  get_confidence_interval(point_estimate = observed_mean_diff_usa_deu,
+                          type = "se",
+                          level = .95)
+
+# Visualize the diff in means in generated null distribution 
+# and the *observed* diff in means
 null_dist_usa_deu %>% 
   visualise() +
-  shade_p_value(observed_median_diff_usa_deu,
-                direction = "two-sided")
+  shade_p_value(observed_mean_diff_usa_deu,
+                direction = "two-sided") +
+  shade_confidence_interval(ci_diff_usa_deu)
 
 p_value_median_usa_deu <- null_dist_usa_deu %>% 
-  get_p_value(obs_stat = observed_median_diff_usa_deu,
+  get_p_value(obs_stat = observed_mean_diff_usa_deu,
               direction = "two-sided")
 
 p_value_median_usa_deu
@@ -264,7 +282,7 @@ p_value_median_usa_deu
 data %>% 
   t_test(formula = new_cases_per_million ~ iso_code,
          direction = "two-sided",
-         order = c("DEU", "USA"))
+         order = c("USA", "DEU"))
 ```
 
 
