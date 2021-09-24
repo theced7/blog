@@ -228,9 +228,11 @@ We further added a red dot to each box which represents the mean value of `new_c
 
 ## Infer
 
-Let's take more in-depth look with infer. Again, we start off by calculating the difference in means which we _observed_ in our data. 
+Let's take more in-depth look with infer. Again, we start off by calculating the difference in means which we **observed** in our data. 
 
-Then we let infer _generate_ data which simulates a population where the null hypothesis is true. In this _generated_ data where we also calculate the difference between means. 
+Then we let infer **generate** data under the assumption that the reported new cases per million are *independent* of the country they occurred in (null hypothesis). When using `type = permute`, infer does this by reassigning the values `new_cases_per_million` _by chance_ to either one of the countries. For each `rep`, our entire data get's shuffled once. Thus, a possible link between both variables get's broken.
+
+Subsequently, we also calculate the difference in means in the generated data. Because we assumed the null hypothesis to be true, this calculation should result in a normal distribution around 0.
 
 ```{r echo=TRUE}
 # Calculate difference in means in observed data
@@ -254,15 +256,14 @@ null_dist_usa_deu %>%
   visualise()
 ```
 
-We see that the difference in means between both countries equals `r round(observed_mean_diff_usa_deu,2)`. 
+We see that the difference in means we _observed_ equals `r round(observed_mean_diff_usa_deu,2)`.
 
-Another very interesting feature of infer is it's ability to calculate [confidence intervals](https://en.wikipedia.org/wiki/Confidence_interval). 
+But we might ask ourselves: How sure can we be of this point estimate? Luckily, infer allows us to calculate [confidence intervals](https://en.wikipedia.org/wiki/Confidence_interval):
 
 ```{r echo=TRUE}
-# Calculate confidence intervals for our observed value in generated null dist.
 ci_diff_usa_deu <- null_dist_usa_deu %>% 
   get_confidence_interval(point_estimate = observed_mean_diff_usa_deu,
-                          type = "se",
+                          type = "se", # standard error
                           level = .95)
 
 # Visualize the diff in means in generated null distribution 
@@ -272,13 +273,27 @@ null_dist_usa_deu %>%
   shade_p_value(observed_mean_diff_usa_deu,
                 direction = "two-sided") +
   shade_confidence_interval(ci_diff_usa_deu)
+```
 
-p_value_median_usa_deu <- null_dist_usa_deu %>% 
+Already we can see that our observed difference in means if much, much higher than anything we calculated in our data which assumed the null hypothesis.
+
+Thus, the possibility of actually observing a difference in means this large (or larger) in a population where the null hypothesis is true, is very small.
+
+If we wanted to put an exact number on that possibility we could calculate the [p-value](https://en.wikipedia.org/wiki/P-value).
+
+
+```{r echo=TRUE}
+p_value_mean_usa_deu <- null_dist_usa_deu %>% 
   get_p_value(obs_stat = observed_mean_diff_usa_deu,
               direction = "two-sided")
 
-p_value_median_usa_deu
+p_value_mean_usa_deu
+```
 
+So, in a world where the number of new covid cases was independent of the country they appeared in, the possibility of observing a difference in means of cases by country of `r observed_mean_diff_usa_deu` (or more) would be `r p_value_mean_usa_deu`. 
+
+
+```{r}
 data %>% 
   t_test(formula = new_cases_per_million ~ iso_code,
          direction = "two-sided",

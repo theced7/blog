@@ -1651,16 +1651,16 @@ Null Hypothesis: independence
 # Groups:   replicate [1,000]
    iso_code new_cases_per_million replicate
    &lt;fct&gt;                    &lt;dbl&gt;     &lt;int&gt;
- 1 GBR                       848.         1
- 2 USA                       809.         1
+ 1 USA                       848.         1
+ 2 GBR                       809.         1
  3 USA                       864.         1
  4 USA                       896.         1
- 5 USA                       917.         1
+ 5 GBR                       917.         1
  6 USA                       774.         1
  7 GBR                      1000.         1
- 8 USA                       881.         1
- 9 USA                       807.         1
-10 USA                       678.         1
+ 8 GBR                       881.         1
+ 9 GBR                       807.         1
+10 GBR                       678.         1
 # ... with 503,990 more rows</code></pre>
 </div>
 <h2 id="calculate-calculating-summary-statistics"><code>calculate</code>: calculating summary statistics</h2>
@@ -1742,16 +1742,16 @@ Null Hypothesis: independence
 # Groups:   replicate [1,000]
    new_cases_per_million iso_code replicate
                    &lt;dbl&gt; &lt;fct&gt;        &lt;int&gt;
- 1                  39.5 GBR              1
- 2                 232.  GBR              1
- 3                  64.4 GBR              1
- 4                 156.  GBR              1
- 5                 607.  GBR              1
- 6                 188.  GBR              1
- 7                 424.  GBR              1
- 8                  28.2 GBR              1
- 9                 344.  GBR              1
-10                 467.  GBR              1
+ 1                 490.  GBR              1
+ 2                 585.  GBR              1
+ 3                 171.  GBR              1
+ 4                 116.  GBR              1
+ 5                  88.3 GBR              1
+ 6                 377.  GBR              1
+ 7                 173.  GBR              1
+ 8                 507.  GBR              1
+ 9                  84.9 GBR              1
+10                 145.  GBR              1
 # ... with 503,990 more rows</code></pre>
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='va'>null_dist_sample</span> <span class='op'>&lt;-</span> <span class='va'>null_dist_sample</span> <span class='op'>%&gt;%</span> 
@@ -1764,18 +1764,18 @@ Null Hypothesis: independence
 Explanatory: iso_code (factor)
 Null Hypothesis: independence
 # A tibble: 1,000 x 2
-   replicate   stat
-       &lt;int&gt;  &lt;dbl&gt;
- 1         1 -21.0 
- 2         2  32.3 
- 3         3  15.1 
- 4         4  10.7 
- 5         5 -10.0 
- 6         6  -8.54
- 7         7 -12.6 
- 8         8  21.8 
- 9         9   9.69
-10        10 -19.9 
+   replicate     stat
+       &lt;int&gt;    &lt;dbl&gt;
+ 1         1  27.4   
+ 2         2  -5.45  
+ 3         3  -0.0500
+ 4         4   8.11  
+ 5         5  -3.27  
+ 6         6  -4.65  
+ 7         7  16.0   
+ 8         8 -12.1   
+ 9         9   0.443 
+10        10  -8.00  
 # ... with 990 more rows</code></pre>
 </div>
 <p>Now we can visualize our generated data. Think of it this way: Through some mathematical tricks, infer tried to simulate what our data would look like in a population where the null hypothesis were true.</p>
@@ -1810,7 +1810,7 @@ Explanatory: iso_code (factor)
 <pre><code># A tibble: 1 x 1
   p_value
     &lt;dbl&gt;
-1     0.9</code></pre>
+1   0.852</code></pre>
 <pre><code># A tibble: 1 x 7
   statistic  t_df p_value alternative estimate lower_ci upper_ci
       &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
@@ -1835,8 +1835,9 @@ Explanatory: iso_code (factor)
 <p>On the first glance, it’s still a close race, however, there seems to be more of a difference in medians.</p>
 <p>We further added a red dot to each box which represents the mean value of <code>new_cases_per_million</code> (notice the difference between mean and median). The means seem to be apart even further.</p>
 <h2 id="infer">Infer</h2>
-<p>Let’s take more in-depth look with infer. Again, we start off by calculating the difference in means which we <em>observed</em> in our data.</p>
-<p>Then we let infer <em>generate</em> data which simulates a population where the null hypothesis is true. In this <em>generated</em> data where we also calculate the difference between means.</p>
+<p>Let’s take more in-depth look with infer. Again, we start off by calculating the difference in means which we <strong>observed</strong> in our data.</p>
+<p>Then we let infer <strong>generate</strong> data under the assumption that the reported new cases per million are <em>independent</em> of the country they occurred in (null hypothesis). When using <code>type = permute</code>, infer does this by reassigning the values <code>new_cases_per_million</code> <em>by chance</em> to either one of the countries. For each <code>rep</code>, our entire data get’s shuffled once. Thus, a possible link between both variables get’s broken.</p>
+<p>Subsequently, we also calculate the difference in means in the generated data. Because we assumed the null hypothesis to be true, this calculation should result in a normal distribution around 0.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Calculate difference in means in observed data</span>
@@ -1870,14 +1871,13 @@ Explanatory: iso_code (factor)
 </div>
 <p><img src="trying-out-infer_files/figure-html5/unnamed-chunk-14-1.png" width="624" /></p>
 </div>
-<p>We see that the difference in means between both countries equals 136.45.</p>
-<p>Another very interesting feature of infer is it’s ability to calculate <a href="https://en.wikipedia.org/wiki/Confidence_interval">confidence intervals</a>.</p>
+<p>We see that the difference in means we <em>observed</em> equals 136.45.</p>
+<p>But we might ask ourselves: How sure can we be of this point estimate? Luckily, infer allows us to calculate <a href="https://en.wikipedia.org/wiki/Confidence_interval">confidence intervals</a>:</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='co'># Calculate confidence intervals for our observed value in generated null dist.</span>
-<span class='va'>ci_diff_usa_deu</span> <span class='op'>&lt;-</span> <span class='va'>null_dist_usa_deu</span> <span class='op'>%&gt;%</span> 
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>ci_diff_usa_deu</span> <span class='op'>&lt;-</span> <span class='va'>null_dist_usa_deu</span> <span class='op'>%&gt;%</span> 
   <span class='fu'><a href='https://infer.tidymodels.org/reference/get_confidence_interval.html'>get_confidence_interval</a></span><span class='op'>(</span>point_estimate <span class='op'>=</span> <span class='va'>observed_mean_diff_usa_deu</span>,
-                          type <span class='op'>=</span> <span class='st'>"se"</span>,
+                          type <span class='op'>=</span> <span class='st'>"se"</span>, <span class='co'># standard error</span>
                           level <span class='op'>=</span> <span class='fl'>.95</span><span class='op'>)</span>
 
 <span class='co'># Visualize the diff in means in generated null distribution </span>
@@ -1889,26 +1889,27 @@ Explanatory: iso_code (factor)
   <span class='fu'><a href='https://infer.tidymodels.org/reference/shade_confidence_interval.html'>shade_confidence_interval</a></span><span class='op'>(</span><span class='va'>ci_diff_usa_deu</span><span class='op'>)</span>
 </code></pre>
 </div>
-<img src="trying-out-infer_files/figure-html5/unnamed-chunk-15-1.png" width="624" />
+<p><img src="trying-out-infer_files/figure-html5/unnamed-chunk-15-1.png" width="624" /></p>
+</div>
+<p>Already we can see that our observed difference in means if much, much higher than anything we calculated in our data which assumed the null hypothesis.</p>
+<p>Thus, the possibility of actually observing a difference in means this large (or larger) in a population where the null hypothesis is true, is very small.</p>
+<p>If we wanted to put an exact number on that possibility we could calculate the <a href="https://en.wikipedia.org/wiki/P-value">p-value</a>.</p>
+<div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>p_value_median_usa_deu</span> <span class='op'>&lt;-</span> <span class='va'>null_dist_usa_deu</span> <span class='op'>%&gt;%</span> 
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>p_value_mean_usa_deu</span> <span class='op'>&lt;-</span> <span class='va'>null_dist_usa_deu</span> <span class='op'>%&gt;%</span> 
   <span class='fu'><a href='https://infer.tidymodels.org/reference/get_p_value.html'>get_p_value</a></span><span class='op'>(</span>obs_stat <span class='op'>=</span> <span class='va'>observed_mean_diff_usa_deu</span>,
               direction <span class='op'>=</span> <span class='st'>"two-sided"</span><span class='op'>)</span>
 
-<span class='va'>p_value_median_usa_deu</span>
+<span class='va'>p_value_mean_usa_deu</span>
 </code></pre>
 </div>
 <pre><code># A tibble: 1 x 1
   p_value
     &lt;dbl&gt;
 1       0</code></pre>
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>data</span> <span class='op'>%&gt;%</span> 
-  <span class='fu'><a href='https://infer.tidymodels.org/reference/t_test.html'>t_test</a></span><span class='op'>(</span>formula <span class='op'>=</span> <span class='va'>new_cases_per_million</span> <span class='op'>~</span> <span class='va'>iso_code</span>,
-         direction <span class='op'>=</span> <span class='st'>"two-sided"</span>,
-         order <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"USA"</span>, <span class='st'>"DEU"</span><span class='op'>)</span><span class='op'>)</span>
-</code></pre>
 </div>
+<p>So, in a world where the number of new covid cases was independent of the country they appeared in, the possibility of observing a difference in means of cases by country of 136.4525119 (or more) would be 0.</p>
+<div class="layout-chunk" data-layout="l-body">
 <pre><code># A tibble: 1 x 7
   statistic  t_df  p_value alternative estimate lower_ci upper_ci
       &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
