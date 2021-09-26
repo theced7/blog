@@ -99,7 +99,7 @@ Now that we have some understanding of how to use the infer functions, we try to
 
 Before we move on with facts, figures and infer, let's try to get a rough picture of our question with some basic data visualization. 
 
-```{r echo=TRUE}
+```{r echo=TRUE, layout="l-body-outset", fig.height=3}
 data %>% 
   filter(iso_code %in% c("GBR", "USA")) %>% 
   ggplot(aes(x = iso_code, y = new_cases_per_million)) +
@@ -213,7 +213,7 @@ To further strengthen our infer and statistical knowledge, let's look at another
 
 ## Charts.
 
-```{r echo=TRUE}
+```{r echo=TRUE, layout="l-body-outset", fig.height=3}
 data %>% 
   filter(iso_code %in% c("DEU", "USA")) %>% 
   ggplot(aes(x = iso_code, y = new_cases_per_million)) +
