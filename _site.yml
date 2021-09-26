@@ -4,6 +4,8 @@ description: |
   Das ist ein Blog mit R und Distill.
 output_dir: "docs"     # root of master branch
 base_url: https://theced7.github.io/blog/
+repository_url: https://github.com/theced7/blog
+creative_commons: CC BY-SA
 navbar:
   right:
     - text: "Home"
