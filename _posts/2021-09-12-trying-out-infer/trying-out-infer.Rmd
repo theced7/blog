@@ -231,9 +231,9 @@ We further added a red dot to each box which represents the mean value of `new_c
 
 Let's take more in-depth look with infer. Again, we start off by calculating the difference in means which we **observed** in our data. 
 
-Then we let infer **generate** data under the assumption that the reported new cases per million are *independent* of the country they occurred in (null hypothesis). When using `type = permute`, infer does this by reassigning the values `new_cases_per_million` _by chance_ to either one of the countries. For each `rep`, our entire data get's shuffled once. Thus, a possible link between both variables get's broken.
+Then we let infer **generate** data under the assumption that the reported new cases per million are *independent* of the country they occurred in (null hypothesis). When using `type = permute`, infer does this by reassigning the values of `new_cases_per_million` _by chance_ to either one of the countries. For each `rep`, our entire data get's shuffled once. Thus, a possible link between both variables get's broken.
 
-Subsequently, we also calculate the difference in means in the generated data. Because we assumed the null hypothesis to be true, this calculation should result in a normal distribution around 0.
+Subsequently, we also calculate the difference in means for each of our reps. Because we assumed the null hypothesis to be true, this calculation should result in a normal distribution around 0.
 
 ```{r echo=TRUE}
 # Calculate difference in means in observed data
