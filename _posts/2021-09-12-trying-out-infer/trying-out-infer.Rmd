@@ -1,7 +1,9 @@
 ---
 title: "Trying out infer"
 description: |
-  This is ought to be a short blog post, firstly to get to grips with Distill, secondly to try out infer.
+  Firstly, this blog post is ought to be an introduction to `infer`. As it turns out, this is also a great way of getting to grips with some basic statistical reasoning. So, if you're relatively new in the world of null hypotheses and boxplots, I believe this might also be a good learning opportunity. 
+  
+  The key question we are asking in this blog post is: TODO
 author:
   - name: theCed7
     url: https://github.com/theced7

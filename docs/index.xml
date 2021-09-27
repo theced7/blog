@@ -12,7 +12,9 @@
       <title>Trying out infer</title>
       <dc:creator>theCed7</dc:creator>
       <link>https://theced7.github.io/blog/posts/2021-09-12-trying-out-infer</link>
-      <description>This is ought to be a short blog post, firstly to get to grips with Distill, secondly to try out infer.</description>
+      <description>Firstly, this blog post is ought to be an introduction to `infer`. As it turns out, this is also a great way of getting to grips with some basic statistical reasoning. So, if you're relatively new in the world of null hypotheses and boxplots, I believe this might also be a good learning opportunity. 
+
+The key question we are asking in this blog post is: _</description>
       <guid>https://theced7.github.io/blog/posts/2021-09-12-trying-out-infer</guid>
       <pubDate>Sat, 11 Sep 2021 00:00:00 +0000</pubDate>
       <media:content url="https://theced7.github.io/blog/posts/2021-09-12-trying-out-infer/trying-out-infer_files/figure-html5/unnamed-chunk-6-1.png" medium="image" type="image/png" width="1248" height="576"/>
