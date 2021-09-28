@@ -21,14 +21,16 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Getting started
 
-First things first: Let's load infer and the rest of the _tidyverse_:
+First things first: Let's load [infer](https://infer.netlify.app/) and the rest of the tidyverse:
 
-```{r echo=TRUE}
+```{r echo=FALSE}
 library(infer)
 library(tidyverse)
 ```
 
-_Infer_ is a _tidyverse_ package which aims to aid statistical testing. As such, we also need some data to conduct statistical testing on. As it is 2021, we might as well use something coronavirus-related. This download the vast _Our World in Data_ source file and reads it into R. I will also focus on the UK, since it's one of the countries with the most cohesive data available.
+Infer is a package which aims to aid statistical testing in a "tidyverse way".
+
+As such, we also need some data to conduct statistical testing on. As it is 2021, we might as well use something coronavirus-related. This download the vast _Our World in Data_ source file and reads it into R. I will also focus on the UK, since it's one of the countries with the most cohesive data available.
 
 ```{r echo=TRUE}
 #download.file("https://github.com/owid/covid-19-data/raw/master/public/data/owid-covid-data.csv", "owid-covid-data.csv")
@@ -41,6 +43,11 @@ data <- data %>%
   filter(date > "2021-01-01")
 
 glimpse(data)
+
+data %>% 
+  filter(iso_code == "GBR") %>% 
+  ggplot(aes(stringency_index)) +
+  geom_histogram()
 ```
 
 # Starting off with _infer_
@@ -285,7 +292,7 @@ Thus, the possibility of actually observing a difference in means this large (or
 If we wanted to put an exact number on that possibility we could calculate the [p-value](https://en.wikipedia.org/wiki/P-value).
 
 
-```{r echo=TRUE}
+```{r echo=TRUE, warning=TRUE}
 p_value_mean_usa_deu <- null_dist_usa_deu %>% 
   get_p_value(obs_stat = observed_mean_diff_usa_deu,
               direction = "two-sided")
@@ -293,8 +300,13 @@ p_value_mean_usa_deu <- null_dist_usa_deu %>%
 p_value_mean_usa_deu
 ```
 
-So, in a world where the number of new covid cases was independent of the country they appeared in, the possibility of observing a difference in means of cases by country of `r observed_mean_diff_usa_deu` (or more) would be `r p_value_mean_usa_deu`. 
+So, in a world where the number of new covid cases was independent of the country they appeared in, the possibility of observing a difference in means of cases by country of `r round(observed_mean_diff_usa_deu, 2)` (or more) would be `r p_value_mean_usa_deu`. 
 
+<aside>
+Note the warning we get if our p-value is calculated as 0. In reality, to get a probability of exactly 0 is highly unlikely. So our p-value would actually be more something along the lines of this: 0.000001. Because we used a rather "brute force" approach (by generating our null hypothesis data) these tiny nuances get lost and infer issues a warning.
+</aside>
+
+Appalled by this bulky wording? Understandable. However, this is due to the very definition of the **p-value**, one of the cornerstones of statistical analysis. And, since this is a very unintuitive value where mistakes are easily made, I believe it's important to get familiar with it from the beginning. 
 
 ```{r}
 data %>% 
